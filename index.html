@@ -1,31 +1,46 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Lexical Decision Task L2-L3</title>
+    <title>EEG Lexical Decision Task - L2/L3</title>
     <script src="https://unpkg.com/jspsych@7.3.3"></script>
     <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.2"></script>
     <link href="https://unpkg.com/jspsych@7.3.3/css/jspsych.css" rel="stylesheet" type="text/css" />
 </head>
 <body style="background-color: #808080;"></body>
 <script>
+    /* 1. Initialize Experiment */
     const jsPsych = initJsPsych({
         on_finish: function() {
+            // This generates the file for CogStat/DDM
             jsPsych.data.get().localSave('csv', 'Result_Participant.csv');
         }
     });
 
-    var instructions = {
+    /* 2. Global Instructions */
+    var general_instructions = {
         type: jsPsychHtmlKeyboardResponse,
         stimulus: `
             <div style="color: white; font-family: Arial;">
                 <h1>Instructions</h1>
                 <p>Press <b>J</b> for REAL WORDS.</p>
                 <p>Press <b>F</b> for PSEUDO-WORDS.</p>
-                <p>Press any key to start the first block.</p>
+                <p>Respond as fast and accurately as possible.</p>
+                <p>Press any key to see the first block language.</p>
             </div>`
     };
 
-    // --- BLOCK 1: ENGLISH (L2) ---
+    /* 3. Block Headers (Language Announcements) */
+    var english_header = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<div style="color: white; font-family: Arial;"><h1>Start of Block: ENGLISH (L2)</h1><p>Press any key to begin.</p></div>`
+    };
+
+    var spanish_header = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<div style="color: white; font-family: Arial;"><h1>Start of Block: SPANISH (L3)</h1><p>Press any key to begin.</p></div>`
+    };
+
+    /* 4. Stimuli Lists */
     var english_stimuli = [
         {item: "yesterday", type: "word", lang: "L2"}, {item: "harmony", type: "word", lang: "L2"},
         {item: "melody", type: "word", lang: "L2"}, {item: "property", type: "word", lang: "L2"},
@@ -47,7 +62,6 @@
         {item: "grastiffer", type: "pseudoword", lang: "L2"}, {item: "clanteron", type: "pseudoword", lang: "L2"}
     ];
 
-    // --- BLOCK 2: SPANISH (L3) ---
     var spanish_stimuli = [
         {item: "cadera", type: "word", lang: "L3"}, {item: "corbata", type: "word", lang: "L3"},
         {item: "sombrero", type: "word", lang: "L3"}, {item: "regalo", type: "word", lang: "L3"},
@@ -66,10 +80,11 @@
         {item: "tudemi", type: "pseudoword", lang: "L3"}, {item: "copefo", type: "pseudoword", lang: "L3"}
     ];
 
+    /* 5. Trial Template */
     var trial = {
         type: jsPsychHtmlKeyboardResponse,
         stimulus: function() {
-            return `<div style="font-size: 60px; color: white;">${jsPsych.timelineVariable('item')}</div>`;
+            return `<div style="font-size: 60px; color: white; font-family: Arial;">${jsPsych.timelineVariable('item')}</div>`;
         },
         choices: ['f', 'j'],
         data: {
@@ -85,26 +100,21 @@
         }
     };
 
-    var break_screen = {
-        type: jsPsychHtmlKeyboardResponse,
-        stimulus: `<div style="color: white;"><h2>End of block.</h2><p>Take a short break. Press any key to continue to the next block.</p></div>`
-    };
-
-    // Constructing the Timeline
-    var english_block = {
+    /* 6. Block Procedures */
+    var english_proc = {
         timeline: [trial],
         timeline_variables: english_stimuli,
         randomize_order: true
     };
 
-    var spanish_block = {
+    var spanish_proc = {
         timeline: [trial],
         timeline_variables: spanish_stimuli,
         randomize_order: true
     };
 
-    // Run order: Instructions -> English -> Break -> Spanish
-    jsPsych.run([instructions, english_block, break_screen, spanish_block]);
+    /* 7. Run Timeline: Instructions -> L2 Header -> L2 Block -> L3 Header -> L3 Block */
+    jsPsych.run([general_instructions, english_header, english_proc, spanish_header, spanish_proc]);
 
 </script>
 </html>
