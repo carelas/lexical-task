@@ -1,45 +1,51 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Lexical Decision Task</title>
+    <title>EEG Lexical Decision Task</title>
     <script src="https://unpkg.com/jspsych@7.3.3"></script>
     <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.2"></script>
     <link href="https://unpkg.com/jspsych@7.3.3/css/jspsych.css" rel="stylesheet" type="text/css" />
 </head>
-<body style="background-color: #808080;"></body> <script>
+<body style="background-color: #808080;"></body>
+<script>
+    /* Initialize jsPsych */
     const jsPsych = initJsPsych({
         on_finish: function() {
-            jsPsych.data.get().localSave('csv', 'resultados_ldt.csv');
+            // Save data automatically for CogStat
+            jsPsych.data.get().localSave('csv', 'Result_Participant.csv');
         }
     });
 
-    var welcome = {
+    /* Instructions in English (as per your Python script) */
+    var instructions = {
         type: jsPsychHtmlKeyboardResponse,
         stimulus: `
-            <div style="color: white; font-family: Arial;">
-                <h1>Bienvenido</h1>
-                <p>Presiona <b>J</b> si ves una PALABRA REAL.</p>
-                <p>Presiona <b>F</b> si ves una PALABRA INVENTADA.</p>
-                <p>Presiona cualquier tecla para empezar.</p>
+            <div style="color: white; font-family: Arial; line-height: 1.6;">
+                <h1>Welcome</h1>
+                <p>Press <b>J</b> if you see a REAL WORD.</p>
+                <p>Press <b>F</b> if you see a PSEUDO-WORD.</p>
+                <p>Please respond as fast and as accurately as possible.</p>
+                <p>Press any key to start the experiment.</p>
             </div>
         `
     };
 
-    // AQUÍ ESTÁN TODOS TUS ESTÍMULOS DE LOS CSV QUE SUBISTE
+    /* Full Stimuli List from your CSV files */
     var stimuli_list = [
-        // Inglés (L2)
+        // English Block (L2)
         {word: "yesterday", type: "word", lang: "L2"}, {word: "harmony", type: "word", lang: "L2"},
         {word: "melody", type: "word", lang: "L2"}, {word: "property", type: "word", lang: "L2"},
         {word: "customer", type: "word", lang: "L2"}, {word: "ordinary", type: "word", lang: "L2"},
         {word: "attitude", type: "word", lang: "L2"}, {word: "quantity", type: "word", lang: "L2"},
         {word: "industry", type: "word", lang: "L2"}, {word: "argument", type: "word", lang: "L2"},
-        {word: "telephone", type: "word", lang: "L2"}, {word: "happiness", type: "word", lang: "L2"},
+        {word: "telephone", type: "word", lang: "L2"}, {word: "happines", type: "word", lang: "L2"},
         {word: "brasticon", type: "pseudoword", lang: "L2"}, {word: "splandock", type: "pseudoword", lang: "L2"},
         {word: "grindifer", type: "pseudoword", lang: "L2"}, {word: "grasticon", type: "pseudoword", lang: "L2"},
         {word: "plimcaster", type: "pseudoword", lang: "L2"}, {word: "drimcaster", type: "pseudoword", lang: "L2"},
         {word: "scrandifer", type: "pseudoword", lang: "L2"}, {word: "brimcaster", type: "pseudoword", lang: "L2"},
-        
-        // Español (L3)
+        {word: "clandister", type: "pseudoword", lang: "L2"}, {word: "grimplock", type: "pseudoword", lang: "L2"},
+
+        // Spanish Block (L3)
         {word: "cadera", type: "word", lang: "L3"}, {word: "corbata", type: "word", lang: "L3"},
         {word: "sombrero", type: "word", lang: "L3"}, {word: "regalo", type: "word", lang: "L3"},
         {word: "pulmones", type: "word", lang: "L3"}, {word: "ventana", type: "word", lang: "L3"},
@@ -49,33 +55,38 @@
         {word: "sapaso", type: "pseudoword", lang: "L3"}, {word: "bacola", type: "pseudoword", lang: "L3"},
         {word: "fotapa", type: "pseudoword", lang: "L3"}, {word: "liboco", type: "pseudoword", lang: "L3"},
         {word: "gumisa", type: "pseudoword", lang: "L3"}, {word: "foboba", type: "pseudoword", lang: "L3"},
-        {word: "lireni", type: "pseudoword", lang: "L3"}, {word: "basase", type: "pseudoword", lang: "L3"}
+        {word: "lireni", type: "pseudoword", lang: "L3"}, {word: "basase", type: "pseudoword", lang: "L3"},
+        {word: "matuse", type: "pseudoword", lang: "L3"}, {word: "mareso", type: "pseudoword", lang: "L3"}
     ];
 
+    /* Trial logic */
     var trial = {
         type: jsPsychHtmlKeyboardResponse,
         stimulus: function() {
-            return `<div style="font-size: 60px; color: white;">${jsPsych.timelineVariable('word')}</div>`;
+            return `<div style="font-size: 60px; color: white; font-family: Arial;">${jsPsych.timelineVariable('word')}</div>`;
         },
         choices: ['f', 'j'],
         data: {
-            lang: jsPsych.timelineVariable('lang'),
-            word_type: jsPsych.timelineVariable('type'),
+            Language: jsPsych.timelineVariable('lang'),
+            Lexicality: jsPsych.timelineVariable('type'),
             correct_response: function() {
                 return jsPsych.timelineVariable('type') === 'word' ? 'j' : 'f';
             }
         },
         on_finish: function(data) {
-            data.correct = jsPsych.pluginAPI.compareKeys(data.response, data.correct_response);
+            // Calculate accuracy
+            data.Correct = jsPsych.pluginAPI.compareKeys(data.response, data.correct_response) ? 1 : 0;
         }
     };
 
-    var procedure = {
+    /* Procedure with full randomization */
+    var test_procedure = {
         timeline: [trial],
         timeline_variables: stimuli_list,
         randomize_order: true
     };
 
-    jsPsych.run([welcome, procedure]);
+    /* Run experiment */
+    jsPsych.run([instructions, test_procedure]);
 </script>
 </html>
