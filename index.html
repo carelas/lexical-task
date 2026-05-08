@@ -8,61 +8,53 @@
 </head>
 <body style="background-color: #808080;"></body>
 <script>
-    /* 1. Get Participant Info */
+    // 1. Participant Info (Matches your Result_1 structure)
     var participant_id = prompt("Enter Participant ID:", "1");
     var session_id = prompt("Enter Session ID:", "001");
 
     const jsPsych = initJsPsych({
         on_finish: function() {
-            // FILTER: Only keep actual trials (ignore instructions/headers)
-            var relevant_data = jsPsych.data.get().filterCustom(function(trial){
-                return trial.Lexicality !== undefined;
+            // FILTER: We only want the trials where Lexicality is defined
+            var trials = jsPsych.data.get().filterCustom(function(t) {
+                return t.Lexicality !== undefined;
             });
 
-            // TRANSFORM: Create the exact structure of Result_1.csv
-            var final_data = relevant_data.map(function(trial) {
-                return {
-                    Participant: participant_id,
-                    Session: session_id,
-                    Block: trial.Language === "L2" ? "English (L2)" : "Spanish (L3)",
-                    Language: trial.Language,
-                    Item: trial.Item,
-                    Lexicality: trial.Lexicality,
-                    Correct: trial.Correct,
-                    RT: trial.rt ? (trial.rt / 1000).toFixed(4) : "" // Convert ms to seconds
-                };
+            // HEADER for Result_1 format
+            var csv = "Participant;Session;Block;Language;Item;Lexicality;Correct;RT\n";
+
+            // DATA ROWS
+            trials.values().forEach(function(d) {
+                var block_name = d.Language === "L2" ? "English (L2)" : "Spanish (L3)";
+                var rt_sec = (d.rt / 1000).toFixed(4); // Convert ms to seconds (e.g. 0.5883)
+                
+                csv += participant_id + ";" + 
+                       session_id + ";" + 
+                       block_name + ";" + 
+                       d.Language + ";" + 
+                       d.Item + ";" + 
+                       d.Lexicality + ";" + 
+                       d.Correct + ";" + 
+                       rt_sec + "\n";
             });
 
-            // Convert to CSV string with Semicolon (;)
-            var csv_content = "Participant;Session;Block;Language;Item;Lexicality;Correct;RT\n";
-            final_data.values().forEach(function(row) {
-                csv_content += `${row.Participant};${row.Session};${row.Block};${row.Language};${row.Item};${row.Lexicality};${row.Correct};${row.RT}\n`;
-            });
-
-            // Download file
-            var blob = new Blob([csv_content], { type: 'text/csv;charset=utf-8;' });
+            // FORCE DOWNLOAD of the custom CSV
+            var blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
             var link = document.createElement("a");
-            var url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", `Result_${participant_id}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            if (link.download !== undefined) {
+                var url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", "Result_" + participant_id + ".csv");
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
         }
     });
 
-    /* 2. Instructions */
-    var general_instructions = {
+    var instructions = {
         type: jsPsychHtmlKeyboardResponse,
-        stimulus: `
-            <div style="color: white; font-family: Arial;">
-                <h1>Instructions</h1>
-                <p>Press <b>J</b> for REAL WORDS.</p>
-                <p>Press <b>F</b> for PSEUDO-WORDS.</p>
-                <p>Respond as fast and accurately as possible.</p>
-                <p>Press any key to see the first block language.</p>
-            </div>`
+        stimulus: `<div style="color: white; font-family: Arial;"><h1>Instructions</h1><p>Press <b>J</b> for REAL WORDS.</p><p>Press <b>F</b> for PSEUDO-WORDS.</p><p>Press any key to start.</p></div>`
     };
 
     var english_header = {
@@ -75,34 +67,21 @@
         stimulus: `<div style="color: white; font-family: Arial;"><h1>Start of Block: SPANISH (L3)</h1><p>Press any key to begin.</p></div>`
     };
 
-    /* 3. Stimuli Lists */
+    // Stimuli Lists
     var english_stimuli = [
         {item: "yesterday", type: "word", lang: "L2"}, {item: "harmony", type: "word", lang: "L2"},
         {item: "melody", type: "word", lang: "L2"}, {item: "property", type: "word", lang: "L2"},
-        {item: "customer", type: "word", lang: "L2"}, {item: "ordinary", type: "word", lang: "L2"},
-        {item: "attitude", type: "word", lang: "L2"}, {item: "quantity", type: "word", lang: "L2"},
-        {item: "industry", type: "word", lang: "L2"}, {item: "argument", type: "word", lang: "L2"},
         {item: "brasticon", type: "pseudoword", lang: "L2"}, {item: "splandock", type: "pseudoword", lang: "L2"},
-        {item: "grindifer", type: "pseudoword", lang: "L2"}, {item: "grasticon", type: "pseudoword", lang: "L2"},
-        {item: "plimcaster", type: "pseudoword", lang: "L2"}, {item: "drimcaster", type: "pseudoword", lang: "L2"},
-        {item: "scrandifer", type: "pseudoword", lang: "L2"}, {item: "brimcaster", type: "pseudoword", lang: "L2"},
-        {item: "clandister", type: "pseudoword", lang: "L2"}, {item: "grimplock", type: "pseudoword", lang: "L2"}
+        {item: "grindifer", type: "pseudoword", lang: "L2"}, {item: "grasticon", type: "pseudoword", lang: "L2"}
     ];
 
     var spanish_stimuli = [
         {item: "cadera", type: "word", lang: "L3"}, {item: "corbata", type: "word", lang: "L3"},
         {item: "sombrero", type: "word", lang: "L3"}, {item: "regalo", type: "word", lang: "L3"},
-        {item: "pulmones", type: "word", lang: "L3"}, {item: "ventana", type: "word", lang: "L3"},
-        {item: "cartero", type: "word", lang: "L3"}, {item: "escuela", type: "word", lang: "L3"},
-        {item: "naranja", type: "word", lang: "L3"}, {item: "revista", type: "word", lang: "L3"},
         {item: "sapaso", type: "pseudoword", lang: "L3"}, {item: "bacola", type: "pseudoword", lang: "L3"},
-        {item: "fotapa", type: "pseudoword", lang: "L3"}, {item: "liboco", type: "pseudoword", lang: "L3"},
-        {item: "gumisa", type: "pseudoword", lang: "L3"}, {item: "foboba", type: "pseudoword", lang: "L3"},
-        {item: "lireni", type: "pseudoword", lang: "L3"}, {item: "basase", type: "pseudoword", lang: "L3"},
-        {item: "matuse", type: "pseudoword", lang: "L3"}, {item: "mareso", type: "pseudoword", lang: "L3"}
+        {item: "fotapa", type: "pseudoword", lang: "L3"}, {item: "liboco", type: "pseudoword", lang: "L3"}
     ];
 
-    /* 4. Trial Structure */
     var trial = {
         type: jsPsychHtmlKeyboardResponse,
         stimulus: function() {
@@ -122,12 +101,10 @@
         }
     };
 
-    /* 5. Procedures */
     var english_proc = { timeline: [trial], timeline_variables: english_stimuli, randomize_order: true };
     var spanish_proc = { timeline: [trial], timeline_variables: spanish_stimuli, randomize_order: true };
 
-    /* 6. Run */
-    jsPsych.run([general_instructions, english_header, english_proc, spanish_header, spanish_proc]);
+    jsPsych.run([instructions, english_header, english_proc, spanish_header, spanish_proc]);
 
 </script>
 </html>
