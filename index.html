@@ -6,86 +6,61 @@
     <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.2"></script>
     <link href="https://unpkg.com/jspsych@7.3.3/css/jspsych.css" rel="stylesheet" type="text/css" />
 </head>
-<body></body>
-<script>
+<body style="background-color: #808080;"></body> <script>
     const jsPsych = initJsPsych({
         on_finish: function() {
-            // Descarga el CSV para que tus amigos te lo envíen
-            jsPsych.data.get().localSave('csv', 'resultados.csv');
+            jsPsych.data.get().localSave('csv', 'resultados_ldt.csv');
         }
     });
 
-    // Instrucciones
-    var instructions = {
+    var welcome = {
         type: jsPsychHtmlKeyboardResponse,
         stimulus: `
-            <h2>Instrucciones</h2>
-            <p>Verás palabras y pseudo-palabras (palabras inventadas).</p>
-            <p>Presiona la tecla <b>J</b> si es una PALABRA REAL.</p>
-            <p>Presiona la tecla <b>F</b> si es una PALABRA INVENTADA.</p>
-            <p>Hazlo lo más rápido y preciso posible.</p>
-            <p>Presiona cualquier tecla para comenzar.</p>
+            <div style="color: white; font-family: Arial;">
+                <h1>Bienvenido</h1>
+                <p>Presiona <b>J</b> si ves una PALABRA REAL.</p>
+                <p>Presiona <b>F</b> si ves una PALABRA INVENTADA.</p>
+                <p>Presiona cualquier tecla para empezar.</p>
+            </div>
         `
     };
 
-    // Lista de estímulos (He sacado los primeros de tus archivos ingles.csv y espanol.csv)
-   var stimuli_list = [
-        // --- BLOQUE INGLÉS (L2) ---
-        { word: "yesterday", type: "word", lang: "L2" },
-        { word: "harmony", type: "word", lang: "L2" },
-        { word: "melody", type: "word", lang: "L2" },
-        { word: "property", type: "word", lang: "L2" },
-        { word: "customer", type: "word", lang: "L2" },
-        { word: "ordinary", type: "word", lang: "L2" },
-        { word: "attitude", type: "word", lang: "L2" },
-        { word: "quantity", type: "word", lang: "L2" },
-        { word: "industry", type: "word", lang: "L2" },
-        { word: "argument", type: "word", lang: "L2" },
-        { word: "brasticon", type: "pseudoword", lang: "L2" },
-        { word: "splandock", type: "pseudoword", lang: "L2" },
-        { word: "grindifer", type: "pseudoword", lang: "L2" },
-        { word: "grasticon", type: "pseudoword", lang: "L2" },
-        { word: "plimcaster", type: "pseudoword", lang: "L2" },
-        { word: "drimcaster", type: "pseudoword", lang: "L2" },
-        { word: "scrandifer", type: "pseudoword", lang: "L2" },
-        { word: "brimcaster", type: "pseudoword", lang: "L2" },
-        { word: "clandister", type: "pseudoword", lang: "L2" },
-        { word: "grimplock", type: "pseudoword", lang: "L2" },
-
-        // --- BLOQUE ESPAÑOL (L3) ---
-        { word: "cadera", type: "word", lang: "L3" },
-        { word: "corbata", type: "word", lang: "L3" },
-        { word: "sombrero", type: "word", lang: "L3" },
-        { word: "regalo", type: "word", lang: "L3" },
-        { word: "pulmones", type: "word", lang: "L3" },
-        { word: "ventana", type: "word", lang: "L3" },
-        { word: "cartero", type: "word", lang: "L3" },
-        { word: "escuela", type: "word", lang: "L3" },
-        { word: "naranja", type: "word", lang: "L3" },
-        { word: "revista", type: "word", lang: "L3" },
-        { word: "sapaso", type: "pseudoword", lang: "L3" },
-        { word: "bacola", type: "pseudoword", lang: "L3" },
-        { word: "fotapa", type: "pseudoword", lang: "L3" },
-        { word: "liboco", type: "pseudoword", lang: "L3" },
-        { word: "gumisa", type: "pseudoword", lang: "L3" },
-        { word: "foboba", type: "pseudoword", lang: "L3" },
-        { word: "lireni", type: "pseudoword", lang: "L3" },
-        { word: "basase", type: "pseudoword", lang: "L3" },
-        { word: "matuse", type: "pseudoword", lang: "L3" },
-        { word: "mareso", type: "pseudoword", lang: "L3" }
-    ];
+    // AQUÍ ESTÁN TODOS TUS ESTÍMULOS DE LOS CSV QUE SUBISTE
+    var stimuli_list = [
+        // Inglés (L2)
+        {word: "yesterday", type: "word", lang: "L2"}, {word: "harmony", type: "word", lang: "L2"},
+        {word: "melody", type: "word", lang: "L2"}, {word: "property", type: "word", lang: "L2"},
+        {word: "customer", type: "word", lang: "L2"}, {word: "ordinary", type: "word", lang: "L2"},
+        {word: "attitude", type: "word", lang: "L2"}, {word: "quantity", type: "word", lang: "L2"},
+        {word: "industry", type: "word", lang: "L2"}, {word: "argument", type: "word", lang: "L2"},
+        {word: "telephone", type: "word", lang: "L2"}, {word: "happiness", type: "word", lang: "L2"},
+        {word: "brasticon", type: "pseudoword", lang: "L2"}, {word: "splandock", type: "pseudoword", lang: "L2"},
+        {word: "grindifer", type: "pseudoword", lang: "L2"}, {word: "grasticon", type: "pseudoword", lang: "L2"},
+        {word: "plimcaster", type: "pseudoword", lang: "L2"}, {word: "drimcaster", type: "pseudoword", lang: "L2"},
+        {word: "scrandifer", type: "pseudoword", lang: "L2"}, {word: "brimcaster", type: "pseudoword", lang: "L2"},
+        
+        // Español (L3)
+        {word: "cadera", type: "word", lang: "L3"}, {word: "corbata", type: "word", lang: "L3"},
+        {word: "sombrero", type: "word", lang: "L3"}, {word: "regalo", type: "word", lang: "L3"},
+        {word: "pulmones", type: "word", lang: "L3"}, {word: "ventana", type: "word", lang: "L3"},
+        {word: "cartero", type: "word", lang: "L3"}, {word: "escuela", type: "word", lang: "L3"},
+        {word: "naranja", type: "word", lang: "L3"}, {word: "revista", type: "word", lang: "L3"},
+        {word: "dinero", type: "word", lang: "L3"}, {word: "hermano", type: "word", lang: "L3"},
+        {word: "sapaso", type: "pseudoword", lang: "L3"}, {word: "bacola", type: "pseudoword", lang: "L3"},
+        {word: "fotapa", type: "pseudoword", lang: "L3"}, {word: "liboco", type: "pseudoword", lang: "L3"},
+        {word: "gumisa", type: "pseudoword", lang: "L3"}, {word: "foboba", type: "pseudoword", lang: "L3"},
+        {word: "lireni", type: "pseudoword", lang: "L3"}, {word: "basase", type: "pseudoword", lang: "L3"}
     ];
 
-    // Definición de cada ensayo (Trial)
     var trial = {
         type: jsPsychHtmlKeyboardResponse,
         stimulus: function() {
-            return `<div style="font-size: 60px;">${jsPsych.timelineVariable('word')}</div>`;
+            return `<div style="font-size: 60px; color: white;">${jsPsych.timelineVariable('word')}</div>`;
         },
         choices: ['f', 'j'],
         data: {
             lang: jsPsych.timelineVariable('lang'),
-            type: jsPsych.timelineVariable('type'),
+            word_type: jsPsych.timelineVariable('type'),
             correct_response: function() {
                 return jsPsych.timelineVariable('type') === 'word' ? 'j' : 'f';
             }
@@ -95,14 +70,12 @@
         }
     };
 
-    // Procedimiento con aleatorización
     var procedure = {
         timeline: [trial],
         timeline_variables: stimuli_list,
         randomize_order: true
     };
 
-    // Ejecutar
-    jsPsych.run([instructions, procedure]);
+    jsPsych.run([welcome, procedure]);
 </script>
 </html>
