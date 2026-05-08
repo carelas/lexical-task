@@ -1,22 +1,58 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>EEG Lexical Decision Task - L2/L3</title>
+    <title>EEG Lexical Decision Task</title>
     <script src="https://unpkg.com/jspsych@7.3.3"></script>
     <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.2"></script>
     <link href="https://unpkg.com/jspsych@7.3.3/css/jspsych.css" rel="stylesheet" type="text/css" />
 </head>
 <body style="background-color: #808080;"></body>
 <script>
-    /* 1. Initialize Experiment */
+    /* 1. Get Participant Info */
+    var participant_id = prompt("Enter Participant ID:", "1");
+    var session_id = prompt("Enter Session ID:", "001");
+
     const jsPsych = initJsPsych({
         on_finish: function() {
-            // This generates the file for CogStat/DDM
-            jsPsych.data.get().localSave('csv', 'Result_Participant.csv');
+            // FILTER: Only keep actual trials (ignore instructions/headers)
+            var relevant_data = jsPsych.data.get().filterCustom(function(trial){
+                return trial.Lexicality !== undefined;
+            });
+
+            // TRANSFORM: Create the exact structure of Result_1.csv
+            var final_data = relevant_data.map(function(trial) {
+                return {
+                    Participant: participant_id,
+                    Session: session_id,
+                    Block: trial.Language === "L2" ? "English (L2)" : "Spanish (L3)",
+                    Language: trial.Language,
+                    Item: trial.Item,
+                    Lexicality: trial.Lexicality,
+                    Correct: trial.Correct,
+                    RT: trial.rt ? (trial.rt / 1000).toFixed(4) : "" // Convert ms to seconds
+                };
+            });
+
+            // Convert to CSV string with Semicolon (;)
+            var csv_content = "Participant;Session;Block;Language;Item;Lexicality;Correct;RT\n";
+            final_data.values().forEach(function(row) {
+                csv_content += `${row.Participant};${row.Session};${row.Block};${row.Language};${row.Item};${row.Lexicality};${row.Correct};${row.RT}\n`;
+            });
+
+            // Download file
+            var blob = new Blob([csv_content], { type: 'text/csv;charset=utf-8;' });
+            var link = document.createElement("a");
+            var url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Result_${participant_id}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     });
 
-    /* 2. Global Instructions */
+    /* 2. Instructions */
     var general_instructions = {
         type: jsPsychHtmlKeyboardResponse,
         stimulus: `
@@ -29,7 +65,6 @@
             </div>`
     };
 
-    /* 3. Block Headers (Language Announcements) */
     var english_header = {
         type: jsPsychHtmlKeyboardResponse,
         stimulus: `<div style="color: white; font-family: Arial;"><h1>Start of Block: ENGLISH (L2)</h1><p>Press any key to begin.</p></div>`
@@ -40,26 +75,18 @@
         stimulus: `<div style="color: white; font-family: Arial;"><h1>Start of Block: SPANISH (L3)</h1><p>Press any key to begin.</p></div>`
     };
 
-    /* 4. Stimuli Lists */
+    /* 3. Stimuli Lists */
     var english_stimuli = [
         {item: "yesterday", type: "word", lang: "L2"}, {item: "harmony", type: "word", lang: "L2"},
         {item: "melody", type: "word", lang: "L2"}, {item: "property", type: "word", lang: "L2"},
         {item: "customer", type: "word", lang: "L2"}, {item: "ordinary", type: "word", lang: "L2"},
         {item: "attitude", type: "word", lang: "L2"}, {item: "quantity", type: "word", lang: "L2"},
         {item: "industry", type: "word", lang: "L2"}, {item: "argument", type: "word", lang: "L2"},
-        {item: "compromise", type: "word", lang: "L2"}, {item: "telephone", type: "word", lang: "L2"},
-        {item: "happiness", type: "word", lang: "L2"}, {item: "wilderness", type: "word", lang: "L2"},
-        {item: "afterward", type: "word", lang: "L2"}, {item: "monitoring", type: "word", lang: "L2"},
-        {item: "advertise", type: "word", lang: "L2"}, {item: "qualified", type: "word", lang: "L2"},
-        {item: "certified", type: "word", lang: "L2"}, {item: "horrible", type: "word", lang: "L2"},
         {item: "brasticon", type: "pseudoword", lang: "L2"}, {item: "splandock", type: "pseudoword", lang: "L2"},
         {item: "grindifer", type: "pseudoword", lang: "L2"}, {item: "grasticon", type: "pseudoword", lang: "L2"},
         {item: "plimcaster", type: "pseudoword", lang: "L2"}, {item: "drimcaster", type: "pseudoword", lang: "L2"},
         {item: "scrandifer", type: "pseudoword", lang: "L2"}, {item: "brimcaster", type: "pseudoword", lang: "L2"},
-        {item: "clandister", type: "pseudoword", lang: "L2"}, {item: "grimplock", type: "pseudoword", lang: "L2"},
-        {item: "splandocky", type: "pseudoword", lang: "L2"}, {item: "strombeck", type: "pseudoword", lang: "L2"},
-        {item: "scrimlock", type: "pseudoword", lang: "L2"}, {item: "plimlocker", type: "pseudoword", lang: "L2"},
-        {item: "grastiffer", type: "pseudoword", lang: "L2"}, {item: "clanteron", type: "pseudoword", lang: "L2"}
+        {item: "clandister", type: "pseudoword", lang: "L2"}, {item: "grimplock", type: "pseudoword", lang: "L2"}
     ];
 
     var spanish_stimuli = [
@@ -68,19 +95,14 @@
         {item: "pulmones", type: "word", lang: "L3"}, {item: "ventana", type: "word", lang: "L3"},
         {item: "cartero", type: "word", lang: "L3"}, {item: "escuela", type: "word", lang: "L3"},
         {item: "naranja", type: "word", lang: "L3"}, {item: "revista", type: "word", lang: "L3"},
-        {item: "dinero", type: "word", lang: "L3"}, {item: "hermano", type: "word", lang: "L3"},
-        {item: "garganta", type: "word", lang: "L3"}, {item: "cascada", type: "word", lang: "L3"},
-        {item: "arroyo", type: "word", lang: "L3"}, {item: "barriga", type: "word", lang: "L3"},
         {item: "sapaso", type: "pseudoword", lang: "L3"}, {item: "bacola", type: "pseudoword", lang: "L3"},
         {item: "fotapa", type: "pseudoword", lang: "L3"}, {item: "liboco", type: "pseudoword", lang: "L3"},
         {item: "gumisa", type: "pseudoword", lang: "L3"}, {item: "foboba", type: "pseudoword", lang: "L3"},
         {item: "lireni", type: "pseudoword", lang: "L3"}, {item: "basase", type: "pseudoword", lang: "L3"},
-        {item: "matuse", type: "pseudoword", lang: "L3"}, {item: "mareso", type: "pseudoword", lang: "L3"},
-        {item: "pemima", type: "pseudoword", lang: "L3"}, {item: "setuba", type: "pseudoword", lang: "L3"},
-        {item: "tudemi", type: "pseudoword", lang: "L3"}, {item: "copefo", type: "pseudoword", lang: "L3"}
+        {item: "matuse", type: "pseudoword", lang: "L3"}, {item: "mareso", type: "pseudoword", lang: "L3"}
     ];
 
-    /* 5. Trial Template */
+    /* 4. Trial Structure */
     var trial = {
         type: jsPsychHtmlKeyboardResponse,
         stimulus: function() {
@@ -100,20 +122,11 @@
         }
     };
 
-    /* 6. Block Procedures */
-    var english_proc = {
-        timeline: [trial],
-        timeline_variables: english_stimuli,
-        randomize_order: true
-    };
+    /* 5. Procedures */
+    var english_proc = { timeline: [trial], timeline_variables: english_stimuli, randomize_order: true };
+    var spanish_proc = { timeline: [trial], timeline_variables: spanish_stimuli, randomize_order: true };
 
-    var spanish_proc = {
-        timeline: [trial],
-        timeline_variables: spanish_stimuli,
-        randomize_order: true
-    };
-
-    /* 7. Run Timeline: Instructions -> L2 Header -> L2 Block -> L3 Header -> L3 Block */
+    /* 6. Run */
     jsPsych.run([general_instructions, english_header, english_proc, spanish_header, spanish_proc]);
 
 </script>
